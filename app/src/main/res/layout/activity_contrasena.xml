@@ -14,19 +14,19 @@
         android:layout_height="wrap_content">
 
         <EditText
+            android:id="@+id/et_correo_cont"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:ems="10"
-            android:id="@+id/et_correo_cont"
             android:hint="correo electrónico"/>
 
         <Button
+            android:id="@+id/btn_restablecer"
             android:text="Restablecer Contraseña"
             android:layout_width="match_parent"
             android:layout_marginRight="5dp"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_restablecer"
             android:layout_weight="1"/>
 
 
