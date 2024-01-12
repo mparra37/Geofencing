@@ -51,7 +51,8 @@ class LoginActivity : AppCompatActivity() {
 
                             val usuario = auth.currentUser;
 
-                            var intent: Intent = Intent(this, InicioActivity::class.java);
+                            //var intent: Intent = Intent(this, InicioActivity::class.java);
+                            var intent: Intent = Intent(this, MapsActivity::class.java);
                             startActivity(intent);
 
                         }else{
