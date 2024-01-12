@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
@@ -25,6 +26,7 @@ import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 
 
+import java.lang.reflect.Type
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -34,6 +36,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import parra.mario.geofencing.databinding.ActivityMapsBinding
 import parra.mario.geofencing.databinding.FragmentHomeBinding
 import kotlin.random.Random
@@ -50,9 +54,13 @@ const val GEOFENCE_DWELL_DELAY = 10 * 1000 // 10 secs
 private val TAG = MapsActivity::class.java.simpleName
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+    lateinit var jsonMarkers: String
+    lateinit var sharedPreferences: SharedPreferences
+    lateinit var gson: Gson
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var geofencingClient: GeofencingClient
+    private val markers = mutableListOf<Marker>()
 
 
     private lateinit var mMap: GoogleMap
@@ -71,16 +79,52 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
         // Add a marker in Sydney and move the camera
+        gson = Gson()
 
+        sharedPreferences = getSharedPreferences("preferences", Context.MODE_PRIVATE)
+        jsonMarkers = gson.toJson(markers)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geofencingClient = LocationServices.getGeofencingClient(this)
     }
 
 
+    private fun loadMarkers() {
+        markers.clear()
+
+        val json = sharedPreferences.getString("markers", null)
+        val type = object : TypeToken<List<MarkerData>>() {}.type
+        val savedMarkerDataList = Gson().fromJson<List<MarkerData>>(json, type)
+
+        savedMarkerDataList?.forEach { markerData ->
+            val marker = map.addMarker(
+                MarkerOptions()
+                    .position(LatLng(markerData.latitude, markerData.longitude))
+                    .title(markerData.title)
+            )
+            // Add other properties like circles, info windows, etc.
+
+            // Add a circle around the marker
+            val circleOptions = CircleOptions()
+                .center(LatLng(markerData.latitude, markerData.longitude))
+                .strokeColor(Color.argb(50, 70, 70, 70))
+                .fillColor(Color.argb(70, 150, 150, 150))
+                .radius(40.0)
+            map.addCircle(circleOptions)
+
+            // Move the camera with animation
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(markerData.latitude, markerData.longitude), CAMERA_ZOOM_LEVEL))
+
+            marker?.let { markers.add(it) }
+        }
+    }
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
+
+        loadMarkers()
 
         val obson = LatLng(27.48642, -109.94083)
         map.addMarker(MarkerOptions().position(obson).title("Ciudad Obregón"))
@@ -143,7 +187,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private val markers = mutableListOf<Marker>()
+
 
     private fun setLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
@@ -167,6 +211,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             // Store the marker
             marker?.let { markers.add(it) }
+
+            saveMarkersLocally()
         }
 
 
@@ -179,6 +225,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     // User clicked "Yes", delete the marker
                     markers.remove(marker)
                     marker.remove()
+                    saveMarkersLocally()
                 }
                 .setNegativeButton("No", null)
                 .show()
@@ -187,6 +234,67 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
     }
+
+
+
+    override fun onRestart() {
+        super.onRestart()
+
+        //val sharedPreferences = getSharedPreferences("your_pref_name", Context.MODE_PRIVATE)
+        val json = sharedPreferences.getString("markers", null)
+        val type = object : TypeToken<List<MarkerData>>() {}.type
+        val savedMarkerDataList = Gson().fromJson<List<MarkerData>>(json, type)
+
+
+
+        //val json = sharedPreferences.getString("markers", null)
+        json?.let {
+            val type = object : TypeToken<List<MarkerData>>() {}.type
+            val markerDataList: List<MarkerData> = Gson().fromJson(json, type)
+
+            markerDataList.forEach { markerData ->
+                val markerOptions = MarkerOptions()
+                    .position(LatLng(markerData.latitude, markerData.longitude))
+                    .title(markerData.title)
+                val marker = map.addMarker(markerOptions)
+                marker?.let { markers.add(it) }
+
+                // If using clustering, you can add markers to the cluster manager instead
+                // clusterManager.addItem(markerData)
+            }
+
+            // If using clustering, you need to cluster the items after adding all of them
+            // clusterManager.cluster()
+        }
+    }
+
+
+    private fun saveMarkersLocally() {
+        val markerDataList = convertMarkersToMarkerData(markers) // Assuming 'markers' is your list of Marker objects
+        val jsonMarkers = serializeMarkers(markerDataList)
+
+        val editor = sharedPreferences.edit()
+        editor.putString("markers", jsonMarkers)
+        editor.apply()
+    }
+
+    private fun serializeMarkers(markerDataList: List<MarkerData>): String {
+        val gson = Gson()
+        return gson.toJson(markerDataList)
+    }
+
+
+    private fun convertMarkersToMarkerData(markers: List<Marker>): List<MarkerData> {
+        return markers.map { marker ->
+            MarkerData(
+                latitude = marker.position.latitude,
+                longitude = marker.position.longitude,
+                title = "Ubicación de Riesgo"
+                // Map other properties as needed
+            )
+        }
+    }
+
 
 
     private fun createGeofence(location: LatLng, key: String, geofencingClient: GeofencingClient){
