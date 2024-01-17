@@ -46,7 +46,7 @@ import kotlin.random.Random
 const val LOCATION_REQUEST_CODE = 123
 const val GEOFENCE_LOCATION_REQUEST_CODE = 12345
 const val CAMERA_ZOOM_LEVEL = 13f
-const val GEOFENCE_RADIUS = 40
+const val GEOFENCE_RADIUS = 100
 const val GEOFENCE_ID = "REMINDER_GEOFENCE_ID"
 const val GEOFENCE_EXPIRATION = 10 * 24 * 60 * 60 * 1000 // 10 days
 const val GEOFENCE_DWELL_DELAY = 10 * 1000 // 10 secs
@@ -61,6 +61,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var geofencingClient: GeofencingClient
     private val markers = mutableListOf<Marker>()
+    private val geofenceList = mutableListOf<Geofence>()
 
 
     private lateinit var mMap: GoogleMap
@@ -127,7 +128,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         loadMarkers()
 
         val obson = LatLng(27.48642, -109.94083)
-        map.addMarker(MarkerOptions().position(obson).title("Ciudad Obregón"))
+        //map.addMarker(MarkerOptions().position(obson).title("Ciudad Obregón"))
         val zoomLevel = 13f
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(obson, zoomLevel))
 
@@ -158,7 +159,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             map.isMyLocationEnabled = true
 
             //Get last known location data
-            fusedLocationClient.lastLocation.addOnSuccessListener {
+           /* fusedLocationClient.lastLocation.addOnSuccessListener {
                 if (it != null) {
                     with(map) {
                         val latLng = LatLng(it.latitude, it.longitude)
@@ -174,7 +175,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         )
                     }
                 }
-            }
+            }*/
         }
         setLongClick(map)
     }
@@ -207,7 +208,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             map.addCircle(circleOptions)
 
             // Move the camera with animation
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, CAMERA_ZOOM_LEVEL))
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
 
             // Store the marker
             marker?.let { markers.add(it) }
@@ -234,6 +235,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
     }
+
 
 
 
@@ -276,6 +278,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val editor = sharedPreferences.edit()
         editor.putString("markers", jsonMarkers)
         editor.apply()
+
+        createGeofencens();
     }
 
     private fun serializeMarkers(markerDataList: List<MarkerData>): String {
@@ -294,6 +298,59 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
     }
+
+    fun createGeofencens(){
+        markers.forEach { marker ->
+            geofenceList.add(buildGeofence(marker))
+        }
+
+        addGeofences()
+    }
+
+    private fun buildGeofence(marker: Marker): Geofence {
+        return Geofence.Builder()
+            .setRequestId("REMINDER_GEOFENCE_ID") // Set the request ID of the geofence
+            .setCircularRegion(
+                marker.position.latitude,
+                marker.position.longitude,
+                100f // radius in meters
+            )
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+            .build()
+    }
+
+    private fun addGeofences() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val geofencingRequest = getGeofencingRequest()
+            val pendingIntent = getGeofencePendingIntent()
+
+            geofencingClient.addGeofences(geofencingRequest, pendingIntent)?.run {
+                addOnSuccessListener {
+                    // Geofences added
+                    // Handle success
+                }
+                addOnFailureListener {
+                    // Failed to add geofences
+                    // Handle failure
+                }
+            }
+        }
+    }
+
+    private fun getGeofencingRequest(): GeofencingRequest {
+        return GeofencingRequest.Builder().apply {
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofences(geofenceList)
+        }.build()
+    }
+
+    private fun getGeofencePendingIntent(): PendingIntent {
+        val intent = Intent(this, GeofenceReceiver::class.java)
+        // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling addGeofences() and removeGeofences().
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+    }
+
 
 
 
@@ -384,6 +441,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 ).show()
                 // Request permissions again here
             }
+        }
+    }
+
+
+    companion object{
+
+        fun showNotification(context: Context, message: String) {
+            //val context = applicationContext // Using requireContext() to get the context
+            val CHANNEL_ID = "REMINDER_NOTIFICATION_CHANNEL"
+            var notificationId = 1554
+            notificationId += Random(notificationId).nextInt(1, 30)
+
+            val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.baseline_access_alarm_24) // Replace with your app's icon
+                .setContentTitle("Ubicación de Riesgo") // Using getString from Fragment
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as
+                    NotificationManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    "Ubicación de Riesgo",
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply { description = "Ubicación de Riesgo" }
+
+                notificationManager.createNotificationChannel(channel)
+            }
+            notificationManager.notify(notificationId, notificationBuilder.build())
         }
     }
 

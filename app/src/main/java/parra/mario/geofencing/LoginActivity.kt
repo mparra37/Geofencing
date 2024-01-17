@@ -9,9 +9,11 @@ import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 
 class LoginActivity : AppCompatActivity() {
+    var usuario: FirebaseUser? = null
     lateinit var btn_registrarse: Button
     lateinit var btn_ingresar: Button
     lateinit var tv_olvideContra: TextView
@@ -28,7 +30,11 @@ class LoginActivity : AppCompatActivity() {
         campo_correo = findViewById(R.id.et_correo);
         campo_contra = findViewById(R.id.et_contra)
 
+
+
         auth = Firebase.auth
+
+        //usuario = auth.currentUser
 
         btn_registrarse.setOnClickListener{
             var intent: Intent = Intent(this, RegistroActivity::class.java);
@@ -49,10 +55,10 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener{task ->
                         if(task.isSuccessful){
 
-                            val usuario = auth.currentUser;
+                            usuario = auth.currentUser;
 
-                            //var intent: Intent = Intent(this, InicioActivity::class.java);
-                            var intent: Intent = Intent(this, MapsActivity::class.java);
+                            var intent: Intent = Intent(this, InicioActivity::class.java);
+                            //var intent: Intent = Intent(this, MapsActivity::class.java);
                             startActivity(intent);
 
                         }else{
@@ -67,5 +73,18 @@ class LoginActivity : AppCompatActivity() {
 
         }
 
+    }
+
+
+
+    override fun onRestart() {
+        super.onRestart()
+
+        //usuario = auth.currentUser;
+
+        if(usuario!= null){
+            var intent: Intent = Intent(this, MapsActivity::class.java);
+            startActivity(intent);
+        }
     }
 }
