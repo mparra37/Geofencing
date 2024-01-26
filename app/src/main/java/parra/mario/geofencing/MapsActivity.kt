@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -31,6 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -64,8 +66,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val geofenceList = mutableListOf<Geofence>()
 
 
-    private lateinit var mMap: GoogleMap
-    private lateinit var binding: ActivityMapsBinding
+    //private lateinit var mMap: GoogleMap
+    //private lateinit var binding: ActivityMapsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +81,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
 
-        // Add a marker in Sydney and move the camera
         gson = Gson()
 
         sharedPreferences = getSharedPreferences("preferences", Context.MODE_PRIVATE)
@@ -87,6 +88,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geofencingClient = LocationServices.getGeofencingClient(this)
+
+        //removeMarkersFromSharedPreferences()
+
+
+
+
     }
 
 
@@ -124,6 +131,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), GEOFENCE_LOCATION_REQUEST_CODE)
+        }
 
         loadMarkers()
 
@@ -188,6 +200,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    private val markerCircleMap = mutableMapOf<Marker, Circle>()
 
 
     private fun setLongClick(map: GoogleMap) {
@@ -205,13 +218,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .strokeColor(Color.argb(50, 70, 70, 70)) // semi-transparent gray stroke
                 .fillColor(Color.argb(70, 150, 150, 150)) // lighter gray fill
                 .radius(40.0) // radius in meters
-            map.addCircle(circleOptions)
+            val circle = map.addCircle(circleOptions)
 
             // Move the camera with animation
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
 
             // Store the marker
-            marker?.let { markers.add(it) }
+            marker?.let {
+                markers.add(it)
+                markerCircleMap[it] = circle
+            }
 
             saveMarkersLocally()
         }
@@ -225,6 +241,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .setPositiveButton("Sí") { dialog, which ->
                     // User clicked "Yes", delete the marker
                     markers.remove(marker)
+                    markerCircleMap[marker]?.remove()
+                    markerCircleMap.remove(marker)
                     marker.remove()
                     saveMarkersLocally()
                 }
@@ -269,6 +287,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             // clusterManager.cluster()
         }
     }
+
+    private fun clearSharedPreferences() {
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
+    }
+
+    private fun removeMarkersFromSharedPreferences() {
+        val editor = sharedPreferences.edit()
+        editor.remove("markers")
+        editor.apply()
+    }
+
 
 
     private fun saveMarkersLocally() {
@@ -407,7 +438,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if(permissions.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED){
                 Toast.makeText(
                     this,
-                    "This apps needs background location to be enabled",
+                    "Esta aplicación necesita permisos de ubicación",
                     Toast.LENGTH_LONG
                 ).show()
                 // call request permissions again
@@ -453,12 +484,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             var notificationId = 1554
             notificationId += Random(notificationId).nextInt(1, 30)
 
+            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+            //val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+              //  PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
+            //} else {
+               // PendingIntent.getActivity(context, 0, urlIntent, 0)
+            //}
+
+            val pendingIntent = PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
+
+
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_access_alarm_24) // Replace with your app's icon
                 .setContentTitle("Ubicación de Riesgo") // Using getString from Fragment
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
 
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as
                     NotificationManager
