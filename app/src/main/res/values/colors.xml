@@ -7,4 +7,21 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="primaryColor">#1E88E5</color> <!-- Blue 600 -->
+    <color name="primaryLightColor">#6AB7FF</color> <!-- Blue 400 -->
+    <color name="primaryDarkColor">#005CB2</color> <!-- Blue 800 -->
+
+    <!-- Secondary Colors -->
+    <color name="secondaryColor">#C2185B</color> <!-- Pink 700 -->
+    <color name="secondaryLightColor">#FA5788</color> <!-- Pink 300 -->
+    <color name="secondaryDarkColor">#8C0032</color> <!-- Pink 900 -->
+
+    <!-- On Colors (for text and icons on top of primary and secondary colors) -->
+    <color name="onPrimaryColor">#FFFFFF</color> <!-- White for text/icons on primary color -->
+    <color name="onSecondaryColor">#FFFFFF</color>
+
+    <color name="buttonColor">#1A73E8</color> <!-- A deep, rich blue -->
+
+
 </resources>
