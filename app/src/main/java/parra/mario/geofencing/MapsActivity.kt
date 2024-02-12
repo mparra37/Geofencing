@@ -16,6 +16,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -37,6 +38,7 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -91,8 +93,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //removeMarkersFromSharedPreferences()
 
+        val botonMensaje: FloatingActionButton = findViewById(R.id.botonMensaje)
 
-
+        botonMensaje.setOnClickListener{
+            val phoneNumber = "526444474618"
+            try {
+                val uri = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber")
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
 
     }
 
@@ -205,31 +217,55 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun setLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
-            // Add a marker
-            val marker = map.addMarker(
-                MarkerOptions().position(latLng).title("Ubicación de riesgo")
-            )
-            // Show info window for the marker
-            marker?.showInfoWindow()
 
-            // Add a circle around the marker
-            val circleOptions = CircleOptions()
-                .center(latLng)
-                .strokeColor(Color.argb(50, 70, 70, 70)) // semi-transparent gray stroke
-                .fillColor(Color.argb(70, 150, 150, 150)) // lighter gray fill
-                .radius(40.0) // radius in meters
-            val circle = map.addCircle(circleOptions)
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Ubicación de riesgo")
 
-            // Move the camera with animation
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
+            // Set up the input
+            val input = EditText(this)
+            input.hint = "Ingresar nombre"
+            builder.setView(input)
 
-            // Store the marker
-            marker?.let {
-                markers.add(it)
-                markerCircleMap[it] = circle
+            var titulo = "Ubicación de Riesgo"
+            builder.setPositiveButton("OK") { dialog, which ->
+                titulo = input.text.toString()
+
+                // Add a marker
+                val marker = map.addMarker(
+                    MarkerOptions().position(latLng).title(titulo)
+                )
+                // Show info window for the marker
+                marker?.showInfoWindow()
+
+                // Add a circle around the marker
+                val circleOptions = CircleOptions()
+                    .center(latLng)
+                    .strokeColor(Color.argb(50, 70, 70, 70)) // semi-transparent gray stroke
+                    .fillColor(Color.argb(70, 150, 150, 150)) // lighter gray fill
+                    .radius(40.0) // radius in meters
+                val circle = map.addCircle(circleOptions)
+
+                // Move the camera with animation
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
+
+                // Store the marker
+                marker?.let {
+                    markers.add(it)
+                    markerCircleMap[it] = circle
+                }
+
+                saveMarkersLocally()
+
+
+
+            }
+            builder.setNegativeButton("Cancel") { dialog, which ->
+                dialog.cancel()
             }
 
-            saveMarkersLocally()
+            builder.show()
+
+
         }
 
 
@@ -253,6 +289,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
     }
+
+
+
 
 
 
