@@ -59,6 +59,7 @@ class RegistroActivity : AppCompatActivity() {
                 if(task.isSuccessful){
                     val usuario = auth.currentUser
                     Toast.makeText(this, "${usuario?.email} se registró correctamente", Toast.LENGTH_LONG).show()
+                    finish()
                 }else{
                     Toast.makeText(this, "No se pudo ingresar", Toast.LENGTH_LONG).show()
                 }

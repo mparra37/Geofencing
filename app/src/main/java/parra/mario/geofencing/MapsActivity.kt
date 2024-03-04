@@ -66,6 +66,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var geofencingClient: GeofencingClient
     private val markers = mutableListOf<Marker>()
     private val geofenceList = mutableListOf<Geofence>()
+    var usuario: String? = null
+    lateinit var btn_cerrar_sesion: FloatingActionButton
 
 
     //private lateinit var mMap: GoogleMap
@@ -77,6 +79,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //binding = ActivityMapsBinding.inflate(layoutInflater)
         //setContentView(binding.root)
+        var bundle = intent.extras
+        if(bundle != null){
+            usuario = bundle.getString("usuario")
+
+
+        }
+
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map2) as SupportMapFragment
@@ -94,7 +103,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //removeMarkersFromSharedPreferences()
 
         val botonMensaje: FloatingActionButton = findViewById(R.id.botonMensaje)
+        btn_cerrar_sesion = findViewById(R.id.btn_cerrar)
 
+        btn_cerrar_sesion.setOnClickListener{
+            finish()
+        }
         botonMensaje.setOnClickListener{
             val phoneNumber = "526444474618"
             try {
@@ -523,7 +536,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             var notificationId = 1554
             notificationId += Random(notificationId).nextInt(1, 30)
 
-            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRsobriobot"))
             //val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
               //  PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
             //} else {

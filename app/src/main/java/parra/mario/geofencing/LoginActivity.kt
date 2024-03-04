@@ -77,14 +77,22 @@ class LoginActivity : AppCompatActivity() {
 
 
 
+    override fun onStart() {
+        super.onStart()
+
+        var usuario = auth?.currentUser
+
+        if(usuario != null){
+            var intent = Intent(this, MapsActivity::class.java)
+            var correo = usuario.email
+            intent.putExtra("usuario",correo)
+            startActivity(intent)
+        }
+    }
+
     override fun onRestart() {
         super.onRestart()
 
-        //usuario = auth.currentUser;
-
-        if(usuario!= null){
-            var intent: Intent = Intent(this, MapsActivity::class.java);
-            startActivity(intent);
-        }
+        auth?.signOut()
     }
 }

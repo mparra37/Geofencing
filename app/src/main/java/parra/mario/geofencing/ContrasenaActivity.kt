@@ -31,6 +31,7 @@ class ContrasenaActivity : AppCompatActivity() {
                     .addOnCompleteListener{ task ->
                         if(task.isSuccessful){
                             Toast.makeText(this, "se envió un correo a $correo", Toast.LENGTH_SHORT).show()
+                            finish()
 
                         }else{
                             Toast.makeText(this, "error al enviar correo", Toast.LENGTH_SHORT).show()
