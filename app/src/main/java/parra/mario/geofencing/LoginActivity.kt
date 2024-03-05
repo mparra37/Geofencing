@@ -59,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
 
                             //var intent: Intent = Intent(this, InicioActivity::class.java); /
                              var intent: Intent = Intent(this, MapsActivity::class.java);
+                            intent.putExtra("usuario",correo)
                             startActivity(intent);
 
                         }else{

@@ -5,41 +5,56 @@ import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlin.random.Random
 
 class GeofenceReceiver: BroadcastReceiver() {
     lateinit var key: String
     lateinit var message: String
+    //lateinit var database: FirebaseDatabase
+    //lateinit var ref_interacciones: DatabaseReference
+
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null) {
             val geofencingEvent = GeofencingEvent.fromIntent(intent)
             if (geofencingEvent?.hasError() == false) {
-
+                //database = Firebase.database
+                //ref_interacciones = database.getReference("interacciones")
 
                 when (geofencingEvent.geofenceTransition) {
                     Geofence.GEOFENCE_TRANSITION_ENTER -> {
                         // Handle enter transition
                         val randomMessage = messages[Random.nextInt(messages.size)]
+                        //val timestamp = System.currentTimeMillis()
+                        //var interaccion = Interaccion(MapsActivity.usuario!!,"enter", message)
+                        //ref_interacciones.child(timestamp.toString()).setValue(interaccion)
+
                         MapsActivity.showNotification(
                             context.applicationContext,
                             randomMessage)
-                    }
-                    /*
-                   Geofence.GEOFENCE_TRANSITION_DWELL -> {
-                        // Handle dwell transition
-                       val randomMessage = messages[Random.nextInt(messages.size)]
-                        MapsActivity.showNotification(
-                            context.applicationContext,
-                            randomMessage + " - https://web.telegram.org/k/#@MRSOBRIO_BOT")
+
+
+                        //val transitionType = geofencingEvent.geofenceTransition
+                        val serviceIntent = Intent(context, GeofenceEventService::class.java)
+                        //serviceIntent.action = transitionType.toString()
+                        serviceIntent.putExtra("accion", "enter")
+
+                        // Add additional data to the intent as needed
+                        //val randomMessage = "Your message here" // Adjust based on your logic
+                        //val usuario = "User identifier" // Adjust based on your logic
+
+                        serviceIntent.putExtra("message", randomMessage)
+                        serviceIntent.putExtra("usuario", MapsActivity.usuario)
+
+                        // Starting the service
+                        context.startService(serviceIntent)
+
                     }
 
-                    Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                        MapsActivity.showNotification(
-                            context.applicationContext,
-                            "Has salido de la zona de riesgo")
-                    }*/
                 }
             } else {
                 // Handle error scenario

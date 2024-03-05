@@ -39,6 +39,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -58,6 +61,9 @@ const val GEOFENCE_DWELL_DELAY = 10 * 1000 // 10 secs
 private val TAG = MapsActivity::class.java.simpleName
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+    lateinit var database: FirebaseDatabase
+    lateinit var ref_ubicaciones: DatabaseReference
+    lateinit var ref_interacciones: DatabaseReference
     lateinit var jsonMarkers: String
     lateinit var sharedPreferences: SharedPreferences
     lateinit var gson: Gson
@@ -66,7 +72,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var geofencingClient: GeofencingClient
     private val markers = mutableListOf<Marker>()
     private val geofenceList = mutableListOf<Geofence>()
-    var usuario: String? = null
+
     lateinit var btn_cerrar_sesion: FloatingActionButton
 
 
@@ -80,11 +86,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //binding = ActivityMapsBinding.inflate(layoutInflater)
         //setContentView(binding.root)
         var bundle = intent.extras
+        usuario = "desconocido"
         if(bundle != null){
             usuario = bundle.getString("usuario")
 
 
         }
+
+        database = Firebase.database
+
+        ref_ubicaciones = database.getReference("ubicaciones")
+
+        //myRef.setValue("Hello, World!")
 
 
         val mapFragment = supportFragmentManager
@@ -231,6 +244,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
 
+
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Ubicación de riesgo")
 
@@ -242,6 +256,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             var titulo = "Ubicación de Riesgo"
             builder.setPositiveButton("OK") { dialog, which ->
                 titulo = input.text.toString()
+
+
 
                 // Add a marker
                 val marker = map.addMarker(
@@ -269,7 +285,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 saveMarkersLocally()
 
-
+                val timestamp = System.currentTimeMillis()
+                var marcador = Marcador(usuario!!,titulo, latLng.toString())
+                ref_ubicaciones.child(timestamp.toString()).setValue(marcador)
 
             }
             builder.setNegativeButton("Cancel") { dialog, which ->
@@ -530,13 +548,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object{
 
+        var usuario: String? = null
         fun showNotification(context: Context, message: String) {
             //val context = applicationContext // Using requireContext() to get the context
             val CHANNEL_ID = "REMINDER_NOTIFICATION_CHANNEL"
             var notificationId = 1554
             notificationId += Random(notificationId).nextInt(1, 30)
 
-            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRsobriobot"))
+            //https://web.telegram.org/k/#@MRSOBRIO_BOT
+            //https://web.telegram.org/k/#@MRsobriobot
+            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+
             //val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
               //  PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
             //} else {
