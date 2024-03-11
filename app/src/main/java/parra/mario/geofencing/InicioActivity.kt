@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -33,11 +34,13 @@ class InicioActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarInicio.toolbar)
 
-        binding.appBarInicio.fab.setOnClickListener { view ->
+
+
+        //binding.appBarInicio.fab.setOnClickListener { view ->
             //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
               //  .setAction("Action", null).show()
-            showNotification("Hola esto es una prueba");
-        }
+          //  showNotification("Hola esto es una prueba");
+        //}
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_inicio)
@@ -62,6 +65,18 @@ class InicioActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_inicio)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                // Handle settings action
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
 
 

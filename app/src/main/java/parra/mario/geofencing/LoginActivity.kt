@@ -57,8 +57,8 @@ class LoginActivity : AppCompatActivity() {
 
                             usuario = auth.currentUser;
 
-                            //var intent: Intent = Intent(this, InicioActivity::class.java); /
-                             var intent: Intent = Intent(this, MapsActivity::class.java);
+                            //var intent: Intent = Intent(this, MapsActivity::class.java); /
+                             var intent: Intent = Intent(this, InicioActivity::class.java);
                             intent.putExtra("usuario",correo)
                             startActivity(intent);
 
@@ -84,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
         var usuario = auth?.currentUser
 
         if(usuario != null){
-            var intent = Intent(this, MapsActivity::class.java)
+            var intent = Intent(this, InicioActivity::class.java)
             var correo = usuario.email
             intent.putExtra("usuario",correo)
             startActivity(intent)
