@@ -11,4 +11,6 @@
     <string name="menu_gallery">Mis Ubicaciones</string>
     <string name="menu_slideshow">Acerca de</string>
     <string name="title_activity_maps">Ubicaciones de Riesgo</string>
+
+    <string name="acerca_de">Nuestra aplicación móvil aborda el consumo riesgoso de alcohol entre la juventud mexicana. Desarrollada en Kotlin, utiliza la API de Google Maps para recopilar datos en tiempo real.  Además, integra un chatbot de Telegram para dar seguimiento a las intervenciones. Ofrecemos apoyo adaptado a la cultura mexicana para ayudar a los jóvenes a manejar su consumo de alcohol de manera responsable.</string>
 </resources>
