@@ -286,7 +286,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 saveMarkersLocally()
 
                 val timestamp = System.currentTimeMillis()
-                var marcador = Marcador(usuario!!,titulo, latLng.toString())
+                var marcador = Marcador(timestamp, usuario!!,titulo, latLng.toString())
                 ref_ubicaciones.child(timestamp.toString()).setValue(marcador)
 
             }

@@ -8,7 +8,7 @@
     <string name="action_settings">Cerrar Sesión</string>
 
     <string name="menu_home">Mapa</string>
-    <string name="menu_gallery">Mis Ubicaciones</string>
+    <string name="menu_gallery">Cerrar Sesión</string>
     <string name="menu_slideshow">Acerca de</string>
     <string name="title_activity_maps">Ubicaciones de Riesgo</string>
 

@@ -8,13 +8,14 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/baseline_place_24"
             android:title="@string/menu_home" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/baseline_list_alt_24"
-            android:title="@string/menu_gallery" />
+
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/baseline_help_outline_24"
             android:title="@string/menu_slideshow" />
+        <item
+            android:id="@+id/nav_gallery"
+            android:icon="@drawable/baseline_list_alt_24"
+            android:title="@string/menu_gallery" />
     </group>
 </menu>

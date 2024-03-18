@@ -13,6 +13,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:inputType="text"
+            android:ems="10"
+            android:id="@+id/et_nombre_reg"
+            android:hint="Nombre"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/et_edad_reg"
+            android:hint="Edad"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:inputType="text"
+            android:ems="10"
+            android:id="@+id/et_genero_reg"
+            android:hint="Género"/>
+
         <EditText
             android:layout_width="match_parent"
             android:layout_height="48dp"

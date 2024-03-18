@@ -13,7 +13,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 
 class LoginActivity : AppCompatActivity() {
-    var usuario: FirebaseUser? = null
+
     lateinit var btn_registrarse: Button
     lateinit var btn_ingresar: Button
     lateinit var tv_olvideContra: TextView
@@ -81,11 +81,11 @@ class LoginActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        var usuario = auth?.currentUser
+        usuario = auth?.currentUser
 
         if(usuario != null){
             var intent = Intent(this, InicioActivity::class.java)
-            var correo = usuario.email
+            var correo = usuario!!.email
             intent.putExtra("usuario",correo)
             startActivity(intent)
         }
@@ -95,5 +95,9 @@ class LoginActivity : AppCompatActivity() {
         super.onRestart()
 
         auth?.signOut()
+    }
+
+    companion object{
+        var usuario: FirebaseUser? = null
     }
 }
