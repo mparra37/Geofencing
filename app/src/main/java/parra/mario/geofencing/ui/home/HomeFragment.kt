@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
@@ -48,6 +49,8 @@ import com.google.firebase.database.getValue
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import parra.mario.geofencing.CAMERA_ZOOM_LEVEL
 import parra.mario.geofencing.GEOFENCE_LOCATION_REQUEST_CODE
 import parra.mario.geofencing.GeofenceReceiver
 import parra.mario.geofencing.InicioActivity
@@ -65,7 +68,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentHomeBinding? = null
 
     lateinit var jsonMarkers: String
-
+    lateinit var sharedPreferences: SharedPreferences
     lateinit var gson: Gson
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -92,7 +95,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         val root: View = binding.root
 
 
-
+        sharedPreferences = requireContext().getSharedPreferences("preferences_sofia", Context.MODE_PRIVATE)
 
 
         gson = Gson()
@@ -137,6 +140,34 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         return root
     }
 
+    private fun saveMarkersLocally() {
+        val markerDataList = convertMarkersToMarkerData(markers) // Assuming 'markers' is your list of Marker objects
+        val jsonMarkers = serializeMarkers(markerDataList)
+
+        val editor = sharedPreferences.edit()
+        editor.putString("markers", jsonMarkers)
+        editor.apply()
+
+        createGeofencens();
+    }
+
+    private fun serializeMarkers(markerDataList: List<MarkerData>): String {
+        val gson = Gson()
+        return gson.toJson(markerDataList)
+    }
+
+
+    private fun convertMarkersToMarkerData(markers: List<Marker>): List<MarkerData> {
+        return markers.map { marker ->
+            MarkerData(
+                latitude = marker.position.latitude,
+                longitude = marker.position.longitude,
+                title = "Ubicación de Riesgo"
+                // Map other properties as needed
+            )
+        }
+    }
+
 
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -159,9 +190,42 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         map.isMyLocationEnabled = true
 
+        //loadMarkers()
+
         //readMarcadoresFromFirstTime()
         setLongClick(map)
     }
+
+    private fun loadMarkers() {
+        markers.clear()
+
+        val json = sharedPreferences.getString("markers", null)
+        val type = object : TypeToken<List<MarkerData>>() {}.type
+        val savedMarkerDataList = Gson().fromJson<List<MarkerData>>(json, type)
+
+        savedMarkerDataList?.forEach { markerData ->
+            val marker = map.addMarker(
+                MarkerOptions()
+                    .position(LatLng(markerData.latitude, markerData.longitude))
+                    .title(markerData.title)
+            )
+            // Add other properties like circles, info windows, etc.
+
+            // Add a circle around the marker
+            val circleOptions = CircleOptions()
+                .center(LatLng(markerData.latitude, markerData.longitude))
+                .strokeColor(Color.argb(50, 70, 70, 70))
+                .fillColor(Color.argb(70, 150, 150, 150))
+                .radius(40.0)
+            map.addCircle(circleOptions)
+
+            // Move the camera with animation
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(markerData.latitude, markerData.longitude), CAMERA_ZOOM_LEVEL))
+
+            marker?.let { markers.add(it) }
+        }
+    }
+
 
     private fun setLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
@@ -242,6 +306,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                             markerCircleMap.remove(marker)
                             marker.remove()
                             marcadores.remove(marcador)
+                            //saveMarkersLocally()
                         }.addOnFailureListener {
                             // Handle failure
                             Toast.makeText(context, "No se pudo eliminar el marcador", Toast.LENGTH_SHORT).show()
@@ -329,6 +394,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 ref_ubicaciones.child(marcador.timestamp.toString()).setValue(marcadorMap)
             }
         }
+        //saveMarkersLocally()
     }
 
 
