@@ -66,7 +66,7 @@ import kotlin.random.Random
 class HomeFragment : Fragment(), OnMapReadyCallback {
     private val geofenceList = mutableListOf<Geofence>()
     private var _binding: FragmentHomeBinding? = null
-
+    private var first_time = true
     lateinit var jsonMarkers: String
     lateinit var sharedPreferences: SharedPreferences
     lateinit var gson: Gson
@@ -76,8 +76,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val markers = mutableListOf<Marker>()
     private val marcadores = mutableListOf<Marcador>()
     private val markerCircleMap = mutableMapOf<Marker, Circle>()
-    lateinit var ref_ubicaciones: DatabaseReference
-    lateinit var database: FirebaseDatabase
+    //lateinit var ref_ubicaciones: DatabaseReference
+    //lateinit var database: FirebaseDatabase
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -94,6 +94,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        first_time = true
 
         sharedPreferences = requireContext().getSharedPreferences("preferences_sofia", Context.MODE_PRIVATE)
 
@@ -101,14 +102,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         gson = Gson()
 
 
-        database = Firebase.database
+        //database = Firebase.database
 
         var usu = "desconocido"
         if(LoginActivity.usuario != null){
             usu = LoginActivity.usuario!!.email!!
             usu = usu.substringBefore('@') + "_ubicaciones"
         }
-        ref_ubicaciones = database.getReference(usu)
+        //ref_ubicaciones = database.getReference(usu)
 
         //readMarcadoresFromFirstTime()
 
@@ -140,15 +141,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         return root
     }
 
-    private fun saveMarkersLocally() {
-        val markerDataList = convertMarkersToMarkerData(markers) // Assuming 'markers' is your list of Marker objects
+    private fun saveMarkersLocally(accion: String) {
+
+        val markerDataList = convertMarkersToMarkerData(markers)
+        // Assuming 'markers' is your list of Marker objects
         val jsonMarkers = serializeMarkers(markerDataList)
 
         val editor = sharedPreferences.edit()
         editor.putString("markers", jsonMarkers)
         editor.apply()
+        if(accion == "agregar"){
+            createGeofencens();
+        }
 
-        createGeofencens();
     }
 
     private fun serializeMarkers(markerDataList: List<MarkerData>): String {
@@ -162,7 +167,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             MarkerData(
                 latitude = marker.position.latitude,
                 longitude = marker.position.longitude,
-                title = "Ubicación de Riesgo"
+                title = marker.title.toString()
                 // Map other properties as needed
             )
         }
@@ -192,12 +197,17 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         //loadMarkers()
 
-        //readMarcadoresFromFirstTime()
+
         setLongClick(map)
+
+        //readMarcadoresFromFirstTime()
+        if(first_time){
+            loadMarkers()
+            first_time = false
+        }
     }
 
     private fun loadMarkers() {
-        markers.clear()
 
         val json = sharedPreferences.getString("markers", null)
         val type = object : TypeToken<List<MarkerData>>() {}.type
@@ -209,6 +219,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     .position(LatLng(markerData.latitude, markerData.longitude))
                     .title(markerData.title)
             )
+
             // Add other properties like circles, info windows, etc.
 
             // Add a circle around the marker
@@ -216,13 +227,16 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 .center(LatLng(markerData.latitude, markerData.longitude))
                 .strokeColor(Color.argb(50, 70, 70, 70))
                 .fillColor(Color.argb(70, 150, 150, 150))
-                .radius(40.0)
-            map.addCircle(circleOptions)
+                .radius(100.0)
+           val circle =  map.addCircle(circleOptions)
 
             // Move the camera with animation
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(markerData.latitude, markerData.longitude), CAMERA_ZOOM_LEVEL))
 
-            marker?.let { markers.add(it) }
+            marker?.let {
+                markers.add(it)
+                markerCircleMap[it] = circle
+            }
         }
     }
 
@@ -254,7 +268,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     .center(latLng)
                     .strokeColor(Color.argb(50, 70, 70, 70)) // semi-transparent gray stroke
                     .fillColor(Color.argb(70, 150, 150, 150)) // lighter gray fill
-                    .radius(40.0) // radius in meters
+                    .radius(100.0) // radius in meters
                 val circle = map.addCircle(circleOptions)
 
                 // Move the camera with animation
@@ -269,10 +283,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                 val timestamp = System.currentTimeMillis()
                 var marcador = Marcador(timestamp,InicioActivity.usuario!!,titulo, latLng.toString())
-                marcadores.add(marcador)
+                //marcadores.add(marcador)
                 //ref_ubicaciones.child(timestamp.toString()).setValue(marcador)
-                addMarcadoresToFirebase()
-                createGeofencens()
+                //addMarcadoresToFirebase()
+                saveMarkersLocally("agregar")
+                //createGeofencens()
             }
             builder.setNegativeButton("Cancel") { dialog, which ->
                 dialog.cancel()
@@ -292,26 +307,33 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 .setPositiveButton("Sí") { dialog, which ->
                     // User clicked "Yes", delete the marker
 
-                    val pos = markers.indexOf(marker)
-                    val marcador = marcadores.get(pos)
+                    //val pos = markers.indexOf(marker)
+                    //val marcador = marcadores.get(pos)
 
 
                     // Delete from Firebase
-                    if (marcador != null) {
-                        ref_ubicaciones.child(marcador.timestamp.toString()).removeValue().addOnSuccessListener {
+                   // if (marcador != null) {
+                     //   ref_ubicaciones.child(marcador.timestamp.toString()).removeValue().addOnSuccessListener {
                             // Handle success
                             //Log.d("Firebase", "Marker successfully deleted.")
-                            markers.remove(marker)
-                            markerCircleMap[marker]?.remove()
-                            markerCircleMap.remove(marker)
-                            marker.remove()
-                            marcadores.remove(marcador)
-                            //saveMarkersLocally()
-                        }.addOnFailureListener {
+                    //Toast.makeText(context, "primero", Toast.LENGTH_SHORT).show()
+                    markers.remove(marker)
+                    markerCircleMap[marker]?.remove()
+                    //Toast.makeText(context, "segundo", Toast.LENGTH_SHORT).show()
+
+                    markerCircleMap.remove(marker)
+                    //Toast.makeText(context, "tercero", Toast.LENGTH_SHORT).show()
+                    removeGeofence(marker.id.toString())
+                    //Toast.makeText(context, "cuarto", Toast.LENGTH_SHORT).show()
+                    marker.remove()
+                    //marcadores.remove(marcador)
+
+                    saveMarkersLocally("remover")
+                       // }.addOnFailureListener {
                             // Handle failure
-                            Toast.makeText(context, "No se pudo eliminar el marcador", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                         //   Toast.makeText(context, "No se pudo eliminar el marcador", Toast.LENGTH_SHORT).show()
+                        //}
+                    //}
 
 
                     //saveMarkersLocally()
@@ -375,77 +397,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
 
 
-    // Function to add a list of Marcadores to Firebase
-    fun addMarcadoresToFirebase() {
-        marcadores.forEach { marcador ->
-            // Generate a unique key for each Marcador
-            val key = ref_ubicaciones.push().key
-
-            // Convert Marcador object to map
-            val marcadorMap = mapOf(
-                "timestamp" to marcador.timestamp,
-                "usuario" to marcador.usuario,
-                "titulo" to marcador.titulo,
-                "posicion" to marcador.posicion
-            )
-
-            // Add to Firebase under the generated key
-            key?.let {
-                ref_ubicaciones.child(marcador.timestamp.toString()).setValue(marcadorMap)
-            }
-        }
-        //saveMarkersLocally()
-    }
 
 
 
-    fun readMarcadoresFromFirstTime() {
-        var cont = 0
-        // Check if the list is empty before proceeding
-        //marcadores.clear()
-        Toast.makeText(context, "buscando", Toast.LENGTH_LONG).show()
-        if (marcadores.isEmpty()) {
-
-            val datos = ref_ubicaciones.get()
-
-            Log.d("datos", datos.toString())
-            // Listen for data at the ref_ubicaciones only if the list is empty
-            /*
-            ref_ubicaciones.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    // Iterate through each child (marcador)
-                    dataSnapshot.children.forEach { snapshot ->
-                        val timestamp = snapshot.child("timestamp").getValue(Long::class.java) ?: 0L
-                        val usuario = snapshot.child("usuario").getValue(String::class.java) ?: ""
-                        val titulo = snapshot.child("titulo").getValue(String::class.java) ?: ""
-                        val posicion = snapshot.child("posicion").getValue(String::class.java) ?: ""
-
-                        // Create Marcador instance manually
-                        val marcador = Marcador(timestamp, usuario, titulo, posicion)
-
-                        marcadores.add(marcador)
-                    }
-                    Toast.makeText(context, marcadores.size, Toast.LENGTH_SHORT).show()
-                    //drawMarcadoresOnMap(map)
-
-                    // Here, you can update your UI or adapter with the populated list
-                    // For example, if you're using a RecyclerView:
-                    // adapter.submitList(marcadoresList)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    // Handle possible errors
-                    //Log.e("Firebase", "Error reading marcadores", databaseError.toException())
-                }
-            }) */
-        } else {
-            // The list is already populated, you might choose to update it differently or log a message
-            //Log.d("Firebase", "List already populated, no need to read from Firebase again.")
-
-        }
-    }
 
     fun createGeofencens(){
+        //removeAllGeofences()
+        //geofenceList.clear()
         markers.forEach { marker ->
             geofenceList.add(buildGeofence(marker))
         }
@@ -453,16 +411,41 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         addGeofences()
     }
 
+    fun removeAllGeofences() {
+        if ( ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Assuming getGeofencePendingIntent() returns the PendingIntent used to add geofences
+            val pendingIntent = getGeofencePendingIntent()
+
+            geofencingClient.removeGeofences(pendingIntent).run {
+                addOnSuccessListener {
+                    // Geofences successfully removed
+                    // Handle success, e.g., by notifying the user
+                    Toast.makeText(context, "All geofences successfully removed", Toast.LENGTH_SHORT).show()
+                }
+                addOnFailureListener {
+                    // Failed to remove geofences
+                    // Handle failure, e.g., by notifying the user or logging the error
+                    Toast.makeText(context, "Error removing geofences", Toast.LENGTH_SHORT).show()
+                    Log.e("GeofenceRemoveError", "Failed to remove all geofences: ${it.message}", it)
+                }
+            }
+        } else {
+            // Permission not granted
+            Toast.makeText(context, "Location permission is required to remove geofences.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     private fun buildGeofence(marker: Marker): Geofence {
         return Geofence.Builder()
-            .setRequestId("REMINDER_GEOFENCE_ID") // Set the request ID of the geofence
+            .setRequestId(marker.id.toString()) // Set the request ID of the geofence
             .setCircularRegion(
                 marker.position.latitude,
                 marker.position.longitude,
                 100f // radius in meters
             )
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
             .build()
     }
 
@@ -475,14 +458,49 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 addOnSuccessListener {
                     // Geofences added
                     // Handle success
+                    //Toast.makeText(context, "te agregó correctamente", Toast.LENGTH_SHORT).show()
                 }
                 addOnFailureListener {
                     // Failed to add geofences
                     // Handle failure
+                    Toast.makeText(context, "Error al agregar geofence", Toast.LENGTH_SHORT).show()
+                    Log.d("error_geo", it.stackTrace.toString())
+                    Log.d("error_geo", it.cause.toString())
+                    Log.d("error_geo", it.toString())
+                    Log.d("error_geo", it.message.toString())
+                    //Log.d("error_geo", it.printStackTrace())
+                    it.printStackTrace()
                 }
             }
+        }else{
+            Toast.makeText(context, "No tiene permisos", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun removeGeofence(markerId: String) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            geofencingClient.removeGeofences(listOf(markerId)).run {
+                addOnSuccessListener {
+                    // Geofences successfully removed
+                    // Handle success
+                    Toast.makeText(context, "Geofence successfully removed", Toast.LENGTH_SHORT).show()
+                }
+                addOnFailureListener {
+                    // Failed to remove geofences
+                    // Handle failure
+                    Toast.makeText(context, "Error removing geofence", Toast.LENGTH_SHORT).show()
+                    Log.d("error_geo_remove", it.stackTrace.toString())
+                    Log.d("error_geo_remove", it.cause.toString())
+                    Log.d("error_geo_remove", it.toString())
+                    Log.d("error_geo_remove", it.message.toString())
+                    it.printStackTrace()
+                }
+            }
+        } else {
+            Toast.makeText(context, "No tiene permisos", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     private fun getGeofencingRequest(): GeofencingRequest {
         return GeofencingRequest.Builder().apply {
