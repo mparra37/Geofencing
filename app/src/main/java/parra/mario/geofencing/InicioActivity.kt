@@ -62,7 +62,7 @@ class InicioActivity : AppCompatActivity() {
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home,  R.id.nav_slideshow, R.id.nav_gallery
+                R.id.nav_home,   R.id.nav_gallery, R.id.nav_slideshow
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -126,7 +126,6 @@ class InicioActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.nav_gallery -> {
 
-                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
