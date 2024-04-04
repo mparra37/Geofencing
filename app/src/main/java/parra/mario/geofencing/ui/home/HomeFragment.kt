@@ -431,6 +431,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
 
     private fun buildGeofence(marker: Marker): Geofence {
+        markerTitles[marker.id] = marker.title ?: "ubicación"
+        Log.d("archivo", "id guardado ${marker.id}")
+        Log.d("archivo", "title guardado ${marker.title}")
         return Geofence.Builder()
             .setRequestId(marker.id.toString()) // Set the request ID of the geofence
             .setCircularRegion(
@@ -531,7 +534,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
 
     companion object{
-
+        val markerTitles = HashMap<String, String>()
         fun showNotification(context: Context, message: String) {
             //val context = applicationContext // Using requireContext() to get the context
             val CHANNEL_ID = "REMINDER_NOTIFICATION_CHANNEL"

@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import parra.mario.geofencing.ui.home.HomeFragment
 import kotlin.random.Random
 
 class GeofenceReceiver: BroadcastReceiver() {
@@ -25,8 +26,16 @@ class GeofenceReceiver: BroadcastReceiver() {
             if (geofencingEvent?.hasError() == false) {
                 //database = Firebase.database
                 //ref_interacciones = database.getReference("interacciones")
+                var markerTitle ="titulo"
+                geofencingEvent.triggeringGeofences?.forEach { geofence ->
+                    Log.d("archivo", "request id ${geofence.requestId}")
+                    markerTitle = HomeFragment.markerTitles[geofence.requestId] ?: "titulo"
+                    //if (geofence.transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                        // Use the markerTitle for notification or other purposes
+                    //}
+                }
 
-                when (geofencingEvent.geofenceTransition) {
+                when (geofencingEvent?.geofenceTransition) {
                     Geofence.GEOFENCE_TRANSITION_ENTER -> {
                         // Handle enter transition
                         val randomMessage = messages[Random.nextInt(messages.size)]
@@ -38,7 +47,7 @@ class GeofenceReceiver: BroadcastReceiver() {
                             context.applicationContext,
                             randomMessage)
 
-                        Log.d("archivo", "entro a ubicación")
+                        Log.d("archivo", "entro a ubicación ${markerTitle}")
                         //val transitionType = geofencingEvent.geofenceTransition
                         //val serviceIntent = Intent(context, GeofenceEventService::class.java)
                         //serviceIntent.action = transitionType.toString()
@@ -60,7 +69,7 @@ class GeofenceReceiver: BroadcastReceiver() {
                     }
 
                     Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                        Log.d("archivo", "salió de ubicación")
+                        Log.d("archivo", "salió de ubicación ${markerTitle}")
                     }
 
                 }
