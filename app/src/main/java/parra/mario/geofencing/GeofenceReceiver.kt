@@ -3,6 +3,7 @@ package parra.mario.geofencing
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.google.firebase.database.DatabaseReference
@@ -37,22 +38,29 @@ class GeofenceReceiver: BroadcastReceiver() {
                             context.applicationContext,
                             randomMessage)
 
-
+                        Log.d("archivo", "entro a ubicación")
                         //val transitionType = geofencingEvent.geofenceTransition
-                        val serviceIntent = Intent(context, GeofenceEventService::class.java)
+                        //val serviceIntent = Intent(context, GeofenceEventService::class.java)
                         //serviceIntent.action = transitionType.toString()
-                        serviceIntent.putExtra("accion", "enter")
+                        //serviceIntent.putExtra("accion", "enter")
 
                         // Add additional data to the intent as needed
                         //val randomMessage = "Your message here" // Adjust based on your logic
                         //val usuario = "User identifier" // Adjust based on your logic
 
-                        serviceIntent.putExtra("message", randomMessage)
-                        serviceIntent.putExtra("usuario", MapsActivity.usuario)
+                        //serviceIntent.putExtra("message", randomMessage)
+                        //serviceIntent.putExtra("usuario", MapsActivity.usuario)
 
                         // Starting the service
-                        context.startService(serviceIntent)
+                        //context.startService(serviceIntent)
 
+                    }
+                    Geofence.GEOFENCE_TRANSITION_DWELL -> {
+                        Log.d("archivo", "se quedó en ubicación")
+                    }
+
+                    Geofence.GEOFENCE_TRANSITION_EXIT -> {
+                        Log.d("archivo", "salió de ubicación")
                     }
 
                 }

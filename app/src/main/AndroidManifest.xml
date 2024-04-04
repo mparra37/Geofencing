@@ -15,7 +15,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/sofia"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/sofia"
         android:supportsRtl="true"
         android:theme="@style/Theme.Geofencing"
         tools:targetApi="31">
@@ -40,6 +40,15 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+
+        <receiver android:name=".NotificationClickedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="parra.mario.geofencing.NOTIFICATION_CLICKED" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".NotificationClickActivity" />
 
         <activity
             android:name=".MapsActivity"

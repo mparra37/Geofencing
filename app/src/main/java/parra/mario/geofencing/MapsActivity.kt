@@ -1,5 +1,6 @@
 package parra.mario.geofencing
 
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -13,11 +14,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -26,9 +26,6 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
-
-
-import java.lang.reflect.Type
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -45,8 +42,6 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import parra.mario.geofencing.databinding.ActivityMapsBinding
-import parra.mario.geofencing.databinding.FragmentHomeBinding
 import kotlin.random.Random
 
 
@@ -565,11 +560,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                // PendingIntent.getActivity(context, 0, urlIntent, 0)
             //}
 
-            val pendingIntent = PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
+            //val pendingIntent = PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
+
+            //val broadcastIntent = Intent(context, NotificationClickedReceiver::class.java)
+            //broadcastIntent.setAction("parra.mario.geofencing.NOTIFICATION_CLICKED")
+            // Optionally, put extra data
+            // Optionally, put extra data
+            //broadcastIntent.putExtra("extra_data", "value")
+
+            val interceptIntent = Intent(context, NotificationClickActivity::class.java)
+            val pendingIntent = PendingIntent.getActivity(context, 0, interceptIntent, PendingIntent.FLAG_IMMUTABLE)
 
 
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.baseline_access_alarm_24) // Replace with your app's icon
+                .setSmallIcon(R.drawable.play_store_512) // Replace with your app's icon
                 .setContentTitle("Ubicación de Riesgo") // Using getString from Fragment
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))

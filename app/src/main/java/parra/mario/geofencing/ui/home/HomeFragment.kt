@@ -230,6 +230,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 markerCircleMap[it] = circle
             }
         }
+        //createGeofencens()
     }
 
 
@@ -279,6 +280,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 //ref_ubicaciones.child(timestamp.toString()).setValue(marcador)
                 //addMarcadoresToFirebase()
                 saveMarkersLocally("agregar")
+                Log.d("archivo", "se agregó marcador")
                 //createGeofencens()
             }
             builder.setNegativeButton("Cancel") { dialog, which ->
@@ -319,7 +321,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     //Toast.makeText(context, "cuarto", Toast.LENGTH_SHORT).show()
                     marker.remove()
                     //marcadores.remove(marcador)
-
+                    Log.d("archivo", "se eliminó marcador")
                     saveMarkersLocally("remover")
                        // }.addOnFailureListener {
                             // Handle failure
@@ -395,7 +397,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     fun createGeofencens(){
         //removeAllGeofences()
-        //geofenceList.clear()
+        geofenceList.clear()
         markers.forEach { marker ->
             geofenceList.add(buildGeofence(marker))
         }
@@ -437,7 +439,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 100f // radius in meters
             )
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
             .build()
     }
 
@@ -455,7 +457,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 addOnFailureListener {
                     // Failed to add geofences
                     // Handle failure
-                    Toast.makeText(context, "Error al agregar geofence", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error al agregar marcador", Toast.LENGTH_SHORT).show()
                     Log.d("error_geo", it.stackTrace.toString())
                     Log.d("error_geo", it.cause.toString())
                     Log.d("error_geo", it.toString())
@@ -475,12 +477,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 addOnSuccessListener {
                     // Geofences successfully removed
                     // Handle success
-                    Toast.makeText(context, "Geofence successfully removed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Se ha eliminado el marcador correctamente", Toast.LENGTH_SHORT).show()
                 }
                 addOnFailureListener {
                     // Failed to remove geofences
                     // Handle failure
-                    Toast.makeText(context, "Error removing geofence", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error al eliminar el marcador", Toast.LENGTH_SHORT).show()
                     Log.d("error_geo_remove", it.stackTrace.toString())
                     Log.d("error_geo_remove", it.cause.toString())
                     Log.d("error_geo_remove", it.toString())
