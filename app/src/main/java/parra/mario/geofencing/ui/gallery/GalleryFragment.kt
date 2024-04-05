@@ -9,10 +9,13 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import parra.mario.geofencing.Archivo
+import parra.mario.geofencing.LoginActivity
 import parra.mario.geofencing.R
 import parra.mario.geofencing.databinding.FragmentGalleryBinding
 
 class GalleryFragment : Fragment() {
+    lateinit var archivo: Archivo
 
     private var _binding: FragmentGalleryBinding? = null
 
@@ -30,6 +33,15 @@ class GalleryFragment : Fragment() {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        var usu = "desconocido"
+        if(LoginActivity.usuario != null){
+            usu = LoginActivity.usuario!!.email!!
+            usu = usu.substringBefore('@')
+        }
+
+        archivo = Archivo(requireContext(), usu)
+        archivo.agregarLinea("Ver ayuda")
 
         val step1TextView: TextView = root.findViewById(R.id.step1)
         step1TextView.text = Html.fromHtml(getString(R.string.step1), Html.FROM_HTML_MODE_LEGACY)

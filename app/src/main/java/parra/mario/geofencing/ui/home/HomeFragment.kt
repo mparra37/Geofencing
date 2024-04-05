@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import parra.mario.geofencing.Archivo
 import parra.mario.geofencing.CAMERA_ZOOM_LEVEL
 import parra.mario.geofencing.GEOFENCE_LOCATION_REQUEST_CODE
 import parra.mario.geofencing.GeofenceReceiver
@@ -51,6 +52,7 @@ import parra.mario.geofencing.LoginActivity
 import parra.mario.geofencing.MapsActivity
 import parra.mario.geofencing.Marcador
 import parra.mario.geofencing.MarkerData
+import parra.mario.geofencing.NotificationClickActivity
 import parra.mario.geofencing.R
 import parra.mario.geofencing.databinding.FragmentHomeBinding
 import kotlin.random.Random
@@ -68,6 +70,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private val markers = mutableListOf<Marker>()
     private val marcadores = mutableListOf<Marcador>()
     private val markerCircleMap = mutableMapOf<Marker, Circle>()
+    lateinit var archivo: Archivo
     //lateinit var ref_ubicaciones: DatabaseReference
     //lateinit var database: FirebaseDatabase
 
@@ -99,10 +102,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         var usu = "desconocido"
         if(LoginActivity.usuario != null){
             usu = LoginActivity.usuario!!.email!!
-            usu = usu.substringBefore('@') + "_ubicaciones"
+            usu = usu.substringBefore('@')
         }
-        //ref_ubicaciones = database.getReference(usu)
 
+        archivo = Archivo(requireContext(), usu)
+        //ref_ubicaciones = database.getReference(usu)
+        archivo.agregarLinea("Ver mapa")
         //readMarcadoresFromFirstTime()
 
 
@@ -120,6 +125,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         val botonMensaje: FloatingActionButton = root.findViewById(R.id.botonMensaje)
 
         botonMensaje.setOnClickListener{
+            archivo.agregarLinea("Clic en icono whatsapp")
             val phoneNumber = "526444474618"
             try {
                 val uri = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber")
@@ -272,8 +278,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                     markers.add(it)
                     markerCircleMap[it] = circle
                 }
-
-
+                var datos: String = "Agregar marcador, ${marker?.title}, ${marker?.position}"
+                archivo.agregarLinea(datos)
                 val timestamp = System.currentTimeMillis()
                 var marcador = Marcador(timestamp,InicioActivity.usuario!!,titulo, latLng.toString())
                 //marcadores.add(marcador)
@@ -311,6 +317,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                             // Handle success
                             //Log.d("Firebase", "Marker successfully deleted.")
                     //Toast.makeText(context, "primero", Toast.LENGTH_SHORT).show()
+                    var datos: String = "Remover marcador, ${marker?.title}, ${marker?.position}"
+                    archivo.agregarLinea(datos)
                     markers.remove(marker)
                     markerCircleMap[marker]?.remove()
                     //Toast.makeText(context, "segundo", Toast.LENGTH_SHORT).show()
@@ -541,14 +549,30 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             var notificationId = 1554
             notificationId += Random(notificationId).nextInt(1, 30)
 
-            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRsobriobot"))
+            //https://web.telegram.org/k/#@MRSOBRIO_BOT
+            //https://web.telegram.org/k/#@MRsobriobot
+            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+            //val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRsobriobot"))
+            //val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            //  PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
+            //} else {
+            // PendingIntent.getActivity(context, 0, urlIntent, 0)
+            //}
 
+            //val pendingIntent = PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
 
-            val pendingIntent = PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)
+            //val broadcastIntent = Intent(context, NotificationClickedReceiver::class.java)
+            //broadcastIntent.setAction("parra.mario.geofencing.NOTIFICATION_CLICKED")
+            // Optionally, put extra data
+            // Optionally, put extra data
+            //broadcastIntent.putExtra("extra_data", "value")
+
+            val interceptIntent = Intent(context, NotificationClickActivity::class.java)
+            val pendingIntent = PendingIntent.getActivity(context, 0, interceptIntent, PendingIntent.FLAG_IMMUTABLE)
 
 
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.baseline_access_alarm_24) // Replace with your app's icon
+                .setSmallIcon(R.drawable.play_store_512) // Replace with your app's icon
                 .setContentTitle("Ubicación de Riesgo") // Using getString from Fragment
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))

@@ -16,12 +16,24 @@ import kotlin.random.Random
 class GeofenceReceiver: BroadcastReceiver() {
     lateinit var key: String
     lateinit var message: String
+    lateinit var archivo: Archivo
     //lateinit var database: FirebaseDatabase
     //lateinit var ref_interacciones: DatabaseReference
 
 
+
+
     override fun onReceive(context: Context?, intent: Intent?) {
+        var usu = "desconocido"
+        if(LoginActivity.usuario != null){
+            usu = LoginActivity.usuario!!.email!!
+            usu = usu.substringBefore('@')
+        }
+
+        archivo = Archivo(context!!, usu)
         if (context != null && intent != null) {
+
+
             val geofencingEvent = GeofencingEvent.fromIntent(intent)
             if (geofencingEvent?.hasError() == false) {
                 //database = Firebase.database
@@ -43,11 +55,11 @@ class GeofenceReceiver: BroadcastReceiver() {
                         //var interaccion = Interaccion(MapsActivity.usuario!!,"enter", message)
                         //ref_interacciones.child(timestamp.toString()).setValue(interaccion)
 
-                        MapsActivity.showNotification(
+                        HomeFragment.showNotification(
                             context.applicationContext,
                             randomMessage)
-
-                        Log.d("archivo", "entro a ubicación ${markerTitle}")
+                        archivo.agregarLinea("Entra a ubicacion, ${markerTitle}, $randomMessage")
+                        Log.d("archivo", "entro a ubicación ${markerTitle}, $randomMessage")
                         //val transitionType = geofencingEvent.geofenceTransition
                         //val serviceIntent = Intent(context, GeofenceEventService::class.java)
                         //serviceIntent.action = transitionType.toString()
@@ -69,7 +81,8 @@ class GeofenceReceiver: BroadcastReceiver() {
                     }
 
                     Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                        Log.d("archivo", "salió de ubicación ${markerTitle}")
+                        Log.d("archivo", "salió de ubicación, ${markerTitle}")
+                        archivo.agregarLinea("Sale de ubicacion ${markerTitle}")
                     }
 
                 }
