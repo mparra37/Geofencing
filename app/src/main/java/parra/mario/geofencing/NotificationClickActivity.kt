@@ -23,9 +23,12 @@ class NotificationClickActivity : AppCompatActivity() {
         Log.d("archivo", "Notification was clicked")
 
         // Now redirect to the URL https://web.telegram.org/k/#@MRsobriobot
-        val redirectIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+
+        //val redirectIntent = Intent(Intent.ACTION_VIEW, Uri.parse("/https://t.me/MRsobriobot"))
+        val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=MRSOBRIO_BOT"))
+        urlIntent.`package` = "org.telegram.messenger"
         //val redirectIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRsobriobot"))
-        startActivity(redirectIntent)
+        startActivity(urlIntent)
 
         // Close this activity
         finish()

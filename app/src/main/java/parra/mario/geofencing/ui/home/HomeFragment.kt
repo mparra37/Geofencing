@@ -551,7 +551,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
             //https://web.telegram.org/k/#@MRSOBRIO_BOT
             //https://web.telegram.org/k/#@MRsobriobot
-            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+            //https://t.me/MRsobriobot
+            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("//https://t.me/MRsobriobot"))
+            //intent.setData(Uri.parse("tg://resolve?domain=MRsobriobot"));
+            //intent.setPackage("org.telegram.messenger")
+
             //val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRsobriobot"))
             //val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             //  PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)

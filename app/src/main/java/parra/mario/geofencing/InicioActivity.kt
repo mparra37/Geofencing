@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -113,7 +114,7 @@ class InicioActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //menuInflater.inflate(R.menu.inicio, menu)
+        menuInflater.inflate(R.menu.inicio, menu)
         return true
     }
 
@@ -124,13 +125,34 @@ class InicioActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.nav_gallery -> {
-
+            R.id.action_settings -> {
+                // Show a confirmation dialog
+                showLogoutConfirmationDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    private fun showLogoutConfirmationDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Cerrar sesión")
+        builder.setMessage("¿Estás seguro de que quieres cerrar sesión?")
+        builder.setPositiveButton("Sí") { dialog, _ ->
+            // Handle the logout logic here
+            Toast.makeText(this, "Cerrando sesión...", Toast.LENGTH_SHORT).show()
+            finish()
+            dialog.dismiss()
+
+        }
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.create().show()
+    }
+
+
+
 
 
 

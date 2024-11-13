@@ -43,13 +43,14 @@ class SlideshowFragment : Fragment() {
         archivo.agregarLinea("Ver acerca de")
 
 
-        btn_enviar_datos = binding.btnEnviarDatos
 
-        btn_enviar_datos.setOnClickListener {
-            archivo.agregarLinea("Enviar datos")
-            Toast.makeText(context, "enviando datos", Toast.LENGTH_SHORT).show()
-            archivo.uploadToFirebaseStorage()
-        }
+        //btn_enviar_datos = binding.btnEnviarDatos
+
+        //btn_enviar_datos.setOnClickListener {
+           // archivo.agregarLinea("Enviar datos")
+            //Toast.makeText(context, "enviando datos", Toast.LENGTH_SHORT).show()
+            //archivo.uploadToFirebaseStorage()
+        //}
 
         return root
     }

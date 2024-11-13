@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import parra.mario.geofencing.Archivo
@@ -16,6 +17,8 @@ import parra.mario.geofencing.databinding.FragmentGalleryBinding
 
 class GalleryFragment : Fragment() {
     lateinit var archivo: Archivo
+
+    lateinit var btn_enviar_datos2: Button
 
     private var _binding: FragmentGalleryBinding? = null
 
@@ -66,6 +69,13 @@ class GalleryFragment : Fragment() {
         val step6TextView: TextView = root.findViewById(R.id.step6)
         step6TextView.text = Html.fromHtml(getString(R.string.step6), Html.FROM_HTML_MODE_LEGACY)
 
+        btn_enviar_datos2 = binding.btnEnviarDatos2
+
+        btn_enviar_datos2.setOnClickListener {
+            archivo.agregarLinea("Enviar datos")
+            Toast.makeText(context, "enviando datos", Toast.LENGTH_SHORT).show()
+            archivo.uploadToFirebaseStorage()
+        }
 
         return root
     }

@@ -552,7 +552,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             //https://web.telegram.org/k/#@MRSOBRIO_BOT
             //https://web.telegram.org/k/#@MRsobriobot
-            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/k/#@MRSOBRIO_BOT"))
+            //https://t.me/MRsobriobot
+            val urlIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/MRSOBRIO_BOT"))
 
             //val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
               //  PendingIntent.getActivity(context, 0, urlIntent, PendingIntent.FLAG_IMMUTABLE)

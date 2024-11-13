@@ -76,5 +76,15 @@
             android:textColor="@color/black"
             android:layout_marginBottom="16dp"/>
 
+        <Button
+            android:id="@+id/btn_enviar_datos2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="32dp"
+            android:text="Enviar Datos" />
+
     </LinearLayout>
+
+
 </ScrollView>

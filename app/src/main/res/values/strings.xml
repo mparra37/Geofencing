@@ -12,15 +12,14 @@
     <string name="menu_slideshow">Acerca de</string>
     <string name="title_activity_maps">Ubicaciones de Riesgo</string>
 
-    <string name="acerca_de">Nuestra aplicación móvil aborda el consumo riesgoso de alcohol entre la juventud mexicana. Desarrollada en Kotlin, utiliza la API de Google Maps para recopilar datos en tiempo real.  Además, integra un chatbot de Telegram para dar seguimiento a las intervenciones. Ofrecemos apoyo adaptado a la cultura mexicana para ayudar a los jóvenes a manejar su consumo de alcohol de manera responsable.</string>
+    <string name="acerca_de">Esta app aborda el consumo riesgoso de alcohol en la juventud mexicana. Recopila datos en tiempo real e integra un chatbot de Telegram para dar seguimiento. Ofrecemos apoyo para fomentar un consumo responsable.</string>
 
-    <string name="app_usage_title">Cómo usar la aplicación</string>
-    <string name="step1"><b>1.- Otorga los permisos de ubicación:</b> Para una experiencia completa, permite el acceso a tu ubicación. Esto es esencial para utilizar todas las funciones de la aplicación.</string>
-    <string name="step2"><b>2.- Agrega ubicaciones de riesgo:</b> Mantén presionado sobre el punto deseado en el mapa para añadir una ubicación de riesgo. No olvides asignarle un título para identificarla fácilmente.</string>
-    <string name="step3"><b>3.- Recibe notificaciones al acercarte:</b> Cada vez que te aproximes a una ubicación registrada, recibirás una notificación en tu dispositivo. Mantente informado y seguro.</string>
-    <string name="step4"><b>4.- Elimina ubicaciones innecesarias:</b> ¿Cambió la situación de una ubicación? Solo presiona el marcador en el mapa y selecciona "Remover" para eliminarla de tu lista.</string>
-    <string name="step5"><b>5.- Interactúa con SofIA para asistencia:</b> ¿Tienes dudas o necesitas ayuda? Nuestro bot SofIA está aquí para asistirte. Una notificación te llevará directamente a nuestro chat interactivo.</string>
-    <string name="step6"><b>6.- Contáctanos fácilmente:</b> Si necesitas soporte adicional, encuentra el ícono de WhatsApp en la parte inferior del mapa y contáctanos con un clic. Estamos aquí para ayudarte.</string>
-
+    <string name="app_usage_title">Guía de uso</string>
+    <string name="step1"><b>1.- Permisos de ubicación:</b> Activa el acceso a tu ubicación para usar todas las funciones.</string>
+    <string name="step2"><b>2.- Agrega puntos de riesgo:</b> Mantén presionado en el mapa para añadir uno y asígnale un título.</string>
+    <string name="step3"><b>3.- Notificaciones:</b> Recibe alertas al acercarte a un punto registrado.</string>
+    <string name="step4"><b>4.- Elimina puntos:</b> Toca un marcador en el mapa y selecciona "Remover".</string>
+    <string name="step5"><b>5.- Usa SofIA:</b> Accede a nuestro bot desde las notificaciones para asistencia.</string>
+    <string name="step6"><b>6.- Contáctanos:</b> Usa el ícono de WhatsApp en el mapa para soporte rápido.</string>
 
 </resources>
